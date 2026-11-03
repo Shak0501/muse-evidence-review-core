@@ -1,0 +1,73 @@
+{
+  "schema": "MUSE_PUBLIC_CORE_MANIFEST_1",
+  "candidate": "muse-evidence-review-core-r1-1",
+  "files": {
+    ".gitignore": {
+      "bytes": 59,
+      "sha256": "fc72d4651c841d5f0a5121e96d6b90c1e09d0e14e228d96b77e1e819f1c044cf"
+    },
+    "LICENSE": {
+      "bytes": 1065,
+      "sha256": "00ab5cfe962f34d1e842186b97846fbcd04ef9c3d68361f5f0ab55206e9c626b"
+    },
+    "LIVE_HOST_CONTRACT.md": {
+      "bytes": 4803,
+      "sha256": "3118dcb5f89295336f31de7fe2cc69bea6dcb8515d86311fbcb34a46151d2104"
+    },
+    "README.md": {
+      "bytes": 6930,
+      "sha256": "ee1cf34a51114b394430c4364b7ca58fa5eca8ae64a1e870da55febf63e737f0"
+    },
+    "RIGHTS_STATUS.md": {
+      "bytes": 1540,
+      "sha256": "dc053df5fd83e5b17db7667331d0f9752436e00287f42aebd31337ac5d85673e"
+    },
+    "app.py": {
+      "bytes": 6461,
+      "sha256": "5eb08bbb9cad85d39bca714ef1af622f127acfd10ac3aa8ab42edddb0dd8eecb"
+    },
+    "core/__init__.py": {
+      "bytes": 74,
+      "sha256": "5b35ee9ef108a1c78514e8ff857445b6bf25d212c7685857a82a5732c7eae30d"
+    },
+    "core/contracts.py": {
+      "bytes": 9068,
+      "sha256": "dc6d6e3008b1d4345a9dc9cb3a3cd98a123dba41642b7bb4759dd88b8246e4c9"
+    },
+    "core/meta_live.py": {
+      "bytes": 13115,
+      "sha256": "998ec4a15d4c7ddb8f714e6b4b81dd1b9aca612a632816328e7eff48b72c6620"
+    },
+    "core/store.py": {
+      "bytes": 10553,
+      "sha256": "65a4d43fb0c6e00ef89199591ef250b47ae59937ac6ed7c4bfdcbc3bc31d1654"
+    },
+    "test.py": {
+      "bytes": 1247,
+      "sha256": "08cdb34dc2ca73bc710e745d648ae0722372bdaa14176d8cb0a75c1e71553e36"
+    },
+    "tests/test_core.py": {
+      "bytes": 21875,
+      "sha256": "d5ffdde49a11042b1b8e4a7ff29ac099a645a68acc4daf3b739851eb22a3952f"
+    },
+    "verify.py": {
+      "bytes": 1134,
+      "sha256": "160b86735a2fd5580ff142c2854286a8b904e057e05da7cea76554a71dc996e6"
+    },
+    "web/app.js": {
+      "bytes": 8746,
+      "sha256": "04e2b02611d39a59ee17765fde6d44101bc6afbcea3cc011d49c0eede5ac1ae4"
+    },
+    "web/index.html": {
+      "bytes": 3321,
+      "sha256": "879fe6c502a5fbbd85850c315781f7cb40f1de2f16216bdec36c661fd06daf25"
+    },
+    "web/style.css": {
+      "bytes": 4360,
+      "sha256": "87a0937bd5d53dfbf216b131f27b30afa981348eca154e593339650ae906368a"
+    }
+  },
+  "release_license": "MIT",
+  "license_holder": "Shak Lai",
+  "license_decision_date": "2026-11-03 Asia/Taipei"
+}
