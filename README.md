@@ -94,8 +94,13 @@ Keep them private; do not publish them or include them in a video.
 
 A durable consumed marker is written **before** credential acquisition or
 transmission. Cancellation after final confirmation consumes that request even
-when transport never begins. A new independent request may be prepared and
-confirmed; this never replays the old one. A stopped workspace can be viewed but
+when transport never begins. Meta Live supports multiple new requests, each with
+a new request ID, its own preview and explicit human confirmation. Each request
+ID permits at most one transmission attempt: this is not a once-per-app limit
+or permission to retry a failed, timed-out or UNKNOWN request. Stop and preserve
+such a result; do not repeatedly send requests to obtain a better recording.
+Offline Demo remains limited to one attempt per practice workspace.
+A stopped workspace can be viewed but
 cannot resume dispatch. To deliberately start fresh writing after stopping:
 
 ```sh
