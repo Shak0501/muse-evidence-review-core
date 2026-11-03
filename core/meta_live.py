@@ -5,6 +5,7 @@ This module contains no embedded credentials and does not issue execution permis
 """
 import http.client
 import getpass
+import math
 import os
 import re
 import ssl
@@ -60,8 +61,15 @@ def parse_response(status, raw, req, draft):
     allowed = required | {'object', 'created_at', 'error', 'incomplete_details', 'instructions',
         'parallel_tool_calls', 'previous_response_id', 'reasoning', 'store', 'temperature', 'text',
         'tool_choice', 'top_p', 'truncation', 'user', 'metadata', 'service_tier', 'background',
-        'max_output_tokens', 'conversation'}
+        'max_output_tokens', 'conversation', 'completed_at', 'top_logprobs'}
     require(required <= set(value) <= allowed, 'RESPONSE_FIELDS')
+    # Optional response metadata only; neither field grants execution or approval.
+    completed_at = value.get('completed_at')
+    require(completed_at is None or type(completed_at) is int or
+            type(completed_at) is float and math.isfinite(completed_at), 'RESPONSE_COMPLETED_AT')
+    top_logprobs = value.get('top_logprobs')
+    require(top_logprobs is None or type(top_logprobs) is int and 0 <= top_logprobs <= 20,
+            'RESPONSE_TOP_LOGPROBS')
     require(type(value['id']) is str and re.fullmatch(r'[A-Za-z0-9_-]{1,256}', value['id']), 'RESPONSE_ID')
     require(value['model'] == MODEL and value['status'] == 'completed', 'MODEL_OR_COMPLETION')
     require(value.get('error') is None and value.get('incomplete_details') is None, 'RESPONSE_INCOMPLETE')

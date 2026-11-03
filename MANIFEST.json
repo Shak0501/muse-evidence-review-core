@@ -1,6 +1,6 @@
 {
   "schema": "MUSE_PUBLIC_CORE_MANIFEST_1",
-  "candidate": "muse-evidence-review-core-p2-1",
+  "candidate": "muse-evidence-review-core-p2-r1-1",
   "files": {
     ".gitignore": {
       "bytes": 95,
@@ -43,8 +43,8 @@
       "sha256": "1bb90429c2c4ece849d21e9df5d38238e18436a073e13b5fadea9ce98ab61aaf"
     },
     "core/meta_live.py": {
-      "bytes": 13482,
-      "sha256": "7d69cbb7e4a098b1d46368d48cc5d206e16411e8cfa20cc34a0d2a510eea54eb"
+      "bytes": 13990,
+      "sha256": "19248ec6d21dd609f9d5b7c65253e5792d1589db6d1dd6bae43de10c01a99bd4"
     },
     "core/network_guard.py": {
       "bytes": 2581,
@@ -78,6 +78,10 @@
       "bytes": 21875,
       "sha256": "d5ffdde49a11042b1b8e4a7ff29ac099a645a68acc4daf3b739851eb22a3952f"
     },
+    "tests/test_response_compat.py": {
+      "bytes": 16813,
+      "sha256": "6f5269aefb6f2c131b7a13fef329aca9e828769e7f329516bc38c449062ead4c"
+    },
     "verify.py": {
       "bytes": 1174,
       "sha256": "fcac0494880c9142ba691c4fe7d0a34c37db9e5217f0ac4050b66d9d12401d3f"
@@ -98,5 +102,7 @@
   "release_license": "MIT",
   "license_holder": "Shak Lai",
   "license_decision_date": "2026-11-03 Asia/Taipei",
-  "connector_scope": "MUSE_DEMO_LIVE_SCOPE_2"
+  "connector_scope": "MUSE_DEMO_LIVE_SCOPE_2",
+  "baseline_candidate": "muse-evidence-review-core-p2-1",
+  "response_compatibility": "META_RESPONSE_OPTIONAL_METADATA_R1"
 }
