@@ -1,84 +1,96 @@
-# Public live-adapter interface — MUSE_META_RESPONSES_R1
+# Independent local demo connector — P2
 
-This is the interface implemented by the current adapter, not an enabled Live
-host. Offline Demo runs independently. The distributed launcher has no authority
-or credential connection; selecting Live only prepares a request preview.
+Schema: `MUSE_DEMO_LIVE_SCOPE_2`. This replaces the unavailable private-host
+requirement for the public main workflow. The older optional adapter interface
+remains only for baseline compatibility tests; it is not the P2 launch path.
 
-## Server-side interfaces
+`live.py` connects the existing editor to `core/demo_host.py`, the bounded terminal
+channel and the existing `MetaHTTPS` adapter/parser. `app.py` remains the offline
+backup. Neither launcher reads a key or transmits merely by starting.
 
-A separately reviewed host must provide:
+## Authority and identity
 
-- `inspect(request) -> scope`: authenticate the operator's permission and return
-  the exact authorized scope. Do not trust grants supplied by the browser.
-- `consume(request, scope) -> True`: durably consume the one-use permission before
-  obtaining a secret or sending. Reject duplicates across concurrent calls and
-  restarts, including when an ordinary workspace is replaced.
-- `revalidate(request, scope) -> True`: check the same consumed permission is
-  still applicable. Never reissue it or replenish an attempt.
-- `credentials.acquire(scope) -> bytearray`: obtain the account's secret only
-  after consumption, restricting the caller, purpose and credential reference.
+The local server builds a context from its saved workspace, never browser-supplied
+SHA claims: request ID/body SHA/byte count, source ID/version/SHA/Epoch, saved draft
+revision/SHA, session, goal, policy, adapter version, program Manifest SHA, model,
+fixed endpoint, non-secret account label, one-attempt limit, creation/expiry,
+and a proposed US$0.10 risk allowance (not a provider cost cap). Preview expires
+after five minutes and rejects a clock earlier than creation.
 
-The strict scope fields in `core/meta_live.py:approved_scope` are:
+POST `/api/prepare` returns exact content and a fresh confirmation token.
+`/api/live/execute` accepts only request_id, token, decisions and immediate;
+unknown fields, old scope packets and uploaded grant JSON are rejected. The five
+booleans are B1, risk, data_egress, budget_once and final_dispatch. All must be true;
+the final button separately supplies immediate=true. Six distinct event IDs are
+saved. This is a trusted local operator ceremony, not remote identity proof or
+RBAC. Automated controlled tests use SYNTHETIC_TEST_OPERATOR, never an actual
+operator approval. Selecting a mode, viewing or cancelling a preview is no grant.
 
-`request_id`, `body_sha`, `endpoint`, `model`, `binding`, `issued_at`, `expires_at`,
-`maximum_attempts`, `risk_micro_usd`, `risk_policy`, `grants`, `runner_reference`,
-`pilot_reference`, `account_reference`, `credential_reference`.
+## Once-only records and failure semantics
 
-These existing field names are retained for adapter compatibility. References
-must be non-secret opaque identifiers, not credentials. The validator requires
-one attempt, a positive risk allowance no greater than 100000 micro-USD, its
-fixed policy identifier and four distinct grants: `DATA_EGRESS`, `BUDGET_ONCE`,
-`FINAL_DISPATCH`, `IMMEDIATE_HUMAN_CONFIRMATION`.
+An owner-only registry (700 directory; 600 records) is separate from the working
+draft. The workspace binds the registry ID. An exclusive process lock plus
+create-exclusive, fsynced spent markers allows at most one consumption of a given
+request. The marker precedes workspace begin, credential access and transport.
+Atomic record replacement uses fsync. Partial writes, missing records, corruption,
+owner/mode/symlink errors fail closed; they never release a consumed identity.
 
-The core checks shape and content binding; it cannot establish a host's
-legitimacy from method names or plausible reference strings. Synthetic test
-objects provide no permission to send. A proposed independent demo host needs
-a separately accepted, versioned scope; the current scope must not be renamed
-or populated with invented references to make it appear compatible.
+A second confirmed request has a new ID and its own six decisions. No action
+reuses old consent. Program/content changes are rechecked before credential
+access and before transmission. Pending requests and current results are
+invalidated on restart; in-progress state becomes UNKNOWN_NO_RETRY. Copied normal
+workspaces cannot replace their registry. Whole-disk rollback by an administrator
+is explicitly outside this local threat model.
 
-## Request and execution boundary
+## Credentials and transport
 
-The request binds the session, source ID/version/raw UTF-8 SHA/epoch, saved draft
-revision/raw UTF-8 SHA, goal/revision, policy SHA and adapter version. Its body is
-rebuilt from authoritative saved state and compared byte-for-byte before use.
-Unadopted drafts, generation history and unrelated fields are not included.
+Only after durable consumption, `TerminalCredentials` opens the controlling TTY,
+turns echo and signal-character handling off, and reads at most 4096 printable
+ASCII bytes for at most 60 seconds. Cancellation, EOF, invalid format and timeout
+restore terminal attributes on the handled paths. No TTY means refusal, not
+visible getpass/input fallback. Secrets do not enter browser payloads, CLI args,
+settings, environment lookup or logs. Mutable buffers are overwritten on exit;
+Python strings/TLS internals do not provide guaranteed secure erasure.
 
-The adapter permits one TLS-verified POST to `https://api.meta.ai/v1/responses`,
-model `muse-wonder-1.0`, reasoning low and at most 2048 output tokens including
-reasoning. Tools, background, storage, streaming and truncation are disabled.
-There is no automatic retry, redirect, Count request or provider fallback.
+The process audit fence permits local UI sockets. In a confirmed Live call only,
+a context-bound connection resolves the fixed Meta hostname and connects once to
+the first public address, with TLS hostname/certificate validation. No redirect,
+proxy environment, address retry, alternate provider, count or hidden continuation
+is used. Test mode is locked and never permits external DNS/connections. This is
+application-process protection, not a claim of OS-wide isolation against arbitrary
+local code or administrators.
 
-The local attempt marker is persisted before permission consumption and secret
-acquisition. It is not a global permission store or proof of payment reservation.
-The host must enforce durable replay protection independently of deletable
-workspace state, and bound its own calls and credential cancellation.
+No secret is acquired in this task's verification: actual TTY mechanics run only
+with synthetic input and a controlled transport. The credential mechanism is
+implemented; an actual account/credential and real-use decisions remain pending.
 
-Scope is rechecked before sending, during reads and before saving the result.
-Result commit checks current saved identities under the workspace lock. Edits or
-Stop cannot make an old response current for changed content. Failures after
-consumption retain the attempt and `UNKNOWN_NO_RETRY`; they do not establish
-zero charges. Stop cannot retract work already received by Meta.
+## Reply, content and usage are different facts
 
-## Credentials, records and cost
+The request outcome separately records NOT_STARTED / ATTEMPTED_UNKNOWN /
+HTTP_RESPONSE_RECEIVED / RESPONSE_BODY_RECEIVED, HTTP status, content validity,
+usage or null, and UNRECONCILED billing. Synthetic tests are not billable usage
+measurements. Receipt provenance is SYNTHETIC_PREFLIGHT_TRANSPORT for injected
+transport and REAL_META_RESPONSE only for the exact native HTTPS class.
 
-No secret belongs in source control, a browser, a command argument or a log.
-The hidden-terminal credential class is unapproved, disabled by the launcher,
-and not qualified for bounded cancellation. A host must use a separately
-accepted server-side mechanism. Buffer clearing is not secure memory erasure.
+Raw replies are bounded. Credential echo, including decoded visible JSON answer
+strings, is rejected and withheld. Invalid/unparseable material may be withheld
+rather than persisted as safe evidence; transport remains recorded. Validly
+structured, safe but rejected replies retain their raw bytes and available usage.
+Schema, complete claim coverage and exact source quotations are independently
+checked. Four categories are allowed, not a required distribution. No fallback
+manufactures a successful answer. Semantic acceptance remains a human decision.
 
-Safe successful raw responses, usage and quotation checks are saved in private
-local state; rejected responses that could expose secrets are not retained.
-Sanitized failure codes and consumed state remain. Storage is not encrypted.
-Billing remains `UNRECONCILED` until checked independently. A US$0.10 risk
-allowance is not a provider-guaranteed charge ceiling. Operators need their own
-eligible account, applicable pricing and explicit permission; the repository
-does not supply credits or authorize use of the author's account.
+A result returns CURRENT only if the saved binding, program identity, time and
+Stop state still match at commit. Otherwise the safe reply and usage survive as
+STALE history. Source/draft/Policy changes never resurrect old results, even if
+text is restored. Stop prevents later local work; it does not promise cancellation
+of remote computation or fees. Normal shutdown cancels terminal waiting and leaves
+any interrupted attempt consumed, without automatic retry.
 
-## What offline tests establish
+## Public boundary
 
-Synthetic transports exercise request/response formats, local quotation checks
-and refusal paths. They do not qualify a real host, credentials, account, network
-connection or model behavior. Test output uses `SYNTHETIC_PREFLIGHT_TRANSPORT`;
-only the real transport may produce `REAL_META_RESPONSE`. No real review has
-been completed for this core. A reproducible independent Live host remains a
-delivery gap; copying the test doubles is not a deployment method.
+Only competition code and documentation are distributed. Local session and
+consumption records, real keys, private source, account proofs and formal systems
+are excluded. Judges use their own account and consent. No formal execution
+identity, organizational approval, credit ownership or competition eligibility is
+asserted by this connector.

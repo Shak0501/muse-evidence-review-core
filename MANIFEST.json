@@ -1,30 +1,34 @@
 {
   "schema": "MUSE_PUBLIC_CORE_MANIFEST_1",
-  "candidate": "muse-evidence-review-core-r1-1",
+  "candidate": "muse-evidence-review-core-p2-1",
   "files": {
     ".gitignore": {
-      "bytes": 59,
-      "sha256": "fc72d4651c841d5f0a5121e96d6b90c1e09d0e14e228d96b77e1e819f1c044cf"
+      "bytes": 95,
+      "sha256": "ed67e4b7a7b17de6c7afd4ed65c7a6c0a12620036d0852447aa74a03131dd7d2"
     },
     "LICENSE": {
       "bytes": 1065,
       "sha256": "00ab5cfe962f34d1e842186b97846fbcd04ef9c3d68361f5f0ab55206e9c626b"
     },
     "LIVE_HOST_CONTRACT.md": {
-      "bytes": 4803,
-      "sha256": "3118dcb5f89295336f31de7fe2cc69bea6dcb8515d86311fbcb34a46151d2104"
+      "bytes": 5773,
+      "sha256": "603302c6d84d2a9842f14004dd9cdc9f401582b06ffa365537e90236610a543b"
     },
     "README.md": {
-      "bytes": 6930,
-      "sha256": "ee1cf34a51114b394430c4364b7ca58fa5eca8ae64a1e870da55febf63e737f0"
+      "bytes": 8319,
+      "sha256": "840d7c5b0ae41f4da2d640e8ef57d60fe7a7f20dcdd7f22edec528b385075757"
     },
     "RIGHTS_STATUS.md": {
-      "bytes": 1540,
-      "sha256": "dc053df5fd83e5b17db7667331d0f9752436e00287f42aebd31337ac5d85673e"
+      "bytes": 1943,
+      "sha256": "bd21a110b0d6be01652031db28b9b88eeca36a56e354a10d2d9b71c5bd2cd366"
     },
     "app.py": {
-      "bytes": 6461,
-      "sha256": "5eb08bbb9cad85d39bca714ef1af622f127acfd10ac3aa8ab42edddb0dd8eecb"
+      "bytes": 8477,
+      "sha256": "cc6f176c9ed075d29be9cadd14a8e5075c3f9555cc2ecce51543a77ca84a51cc"
+    },
+    "connector_test.py": {
+      "bytes": 827,
+      "sha256": "b0239d4fb6f3387604909e9ad5680f669c95d307251280df475541323ea6a6df"
     },
     "core/__init__.py": {
       "bytes": 74,
@@ -34,40 +38,65 @@
       "bytes": 9068,
       "sha256": "dc6d6e3008b1d4345a9dc9cb3a3cd98a123dba41642b7bb4759dd88b8246e4c9"
     },
+    "core/demo_host.py": {
+      "bytes": 15781,
+      "sha256": "1bb90429c2c4ece849d21e9df5d38238e18436a073e13b5fadea9ce98ab61aaf"
+    },
     "core/meta_live.py": {
-      "bytes": 13115,
-      "sha256": "998ec4a15d4c7ddb8f714e6b4b81dd1b9aca612a632816328e7eff48b72c6620"
+      "bytes": 13482,
+      "sha256": "7d69cbb7e4a098b1d46368d48cc5d206e16411e8cfa20cc34a0d2a510eea54eb"
+    },
+    "core/network_guard.py": {
+      "bytes": 2581,
+      "sha256": "300a766de346778735312b069b186a6e66dcfcf08e0943c3561a6c9640df03ae"
     },
     "core/store.py": {
-      "bytes": 10553,
-      "sha256": "65a4d43fb0c6e00ef89199591ef250b47ae59937ac6ed7c4bfdcbc3bc31d1654"
+      "bytes": 12381,
+      "sha256": "d4257f610eb13abb6c91297e2be47d0d46fefc7046fade1d2867400c099581d5"
+    },
+    "core/terminal_credentials.py": {
+      "bytes": 3279,
+      "sha256": "403ba9b66e011ca55ba8b43a56acb3c4106cc4250f477d93ca7d5a37770aaad4"
+    },
+    "live.py": {
+      "bytes": 450,
+      "sha256": "6f9fa991f1430af7b5a2f7bbea72aa73232024b2e33a29168f65b26c30679e76"
     },
     "test.py": {
       "bytes": 1247,
       "sha256": "08cdb34dc2ca73bc710e745d648ae0722372bdaa14176d8cb0a75c1e71553e36"
+    },
+    "tests/connector_checks.py": {
+      "bytes": 24471,
+      "sha256": "935fa9074356362240ed53d7fc2ae2cc07bc3feb7e22c2bb0cda0687c0a73376"
+    },
+    "tests/connector_support.py": {
+      "bytes": 3575,
+      "sha256": "f99e7736d21394c98f0392dde990c8b952e5c2b7ade7cd0b95a16d2d2bf6bad8"
     },
     "tests/test_core.py": {
       "bytes": 21875,
       "sha256": "d5ffdde49a11042b1b8e4a7ff29ac099a645a68acc4daf3b739851eb22a3952f"
     },
     "verify.py": {
-      "bytes": 1134,
-      "sha256": "160b86735a2fd5580ff142c2854286a8b904e057e05da7cea76554a71dc996e6"
+      "bytes": 1174,
+      "sha256": "fcac0494880c9142ba691c4fe7d0a34c37db9e5217f0ac4050b66d9d12401d3f"
     },
     "web/app.js": {
-      "bytes": 8746,
-      "sha256": "04e2b02611d39a59ee17765fde6d44101bc6afbcea3cc011d49c0eede5ac1ae4"
+      "bytes": 12962,
+      "sha256": "ea148b39c48d9f0860ad58a555da8582c973f424713c8cc30c1655c3106463d4"
     },
     "web/index.html": {
-      "bytes": 3321,
-      "sha256": "879fe6c502a5fbbd85850c315781f7cb40f1de2f16216bdec36c661fd06daf25"
+      "bytes": 4775,
+      "sha256": "1710b4eb75ed6b63a91c74804c41beaa2ffaf80bc886b4ce53e886d57abb1e73"
     },
     "web/style.css": {
-      "bytes": 4360,
-      "sha256": "87a0937bd5d53dfbf216b131f27b30afa981348eca154e593339650ae906368a"
+      "bytes": 5104,
+      "sha256": "7f148fff48d7e3d4993d7fdd34a27b259669199185273f533b218d633e2da742"
     }
   },
   "release_license": "MIT",
   "license_holder": "Shak Lai",
-  "license_decision_date": "2026-11-03 Asia/Taipei"
+  "license_decision_date": "2026-11-03 Asia/Taipei",
+  "connector_scope": "MUSE_DEMO_LIVE_SCOPE_2"
 }

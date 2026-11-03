@@ -1,4 +1,6 @@
 .muse-local/
+.muse-p2-workspace/
+.muse-consents/
 __pycache__/
 *.pyc
 .DS_Store

@@ -14,7 +14,9 @@ from .contracts import (Refusal, SOURCE, SOURCE_ID, POLICY, MODEL, ENDPOINT, can
 
 
 class Store:
-    def __init__(self, directory):
+    def __init__(self, directory, connector=False):
+        self.connector = connector
+        self.schema = 'MUSE_LOCAL_CORE_P2' if connector else 'MUSE_LOCAL_CORE_R1'
         self.root = Path(directory).absolute()
         require(not self.root.is_symlink(), 'STATE_SYMLINK')
         self.root.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -35,24 +37,38 @@ class Store:
         self.faulted = False
         if self.path.exists():
             state = strict_json(self.path.read_bytes(), 2097152)
-            require(type(state) is dict and state.get('schema') == 'MUSE_LOCAL_CORE_R1', 'STATE_SCHEMA')
-            require(set(state) == {'schema', 'session', 'source_loaded', 'source_epoch', 'draft', 'revision',
-                    'draft_sha', 'requests', 'reviews', 'offline_attempts', 'live_attempts', 'stopped', 'events'}, 'STATE_SCHEMA')
+            require(type(state) is dict and state.get('schema') == self.schema, 'STATE_SCHEMA')
+            expected={'schema', 'session', 'source_loaded', 'source_epoch', 'draft', 'revision',
+                    'draft_sha', 'requests', 'reviews', 'offline_attempts', 'live_attempts', 'stopped', 'events'}
+            if self.connector:expected.add('connector_registry_id')
+            require(set(state)==expected,'STATE_SCHEMA')
             require(type(state['requests']) is list and type(state['reviews']) is list, 'STATE_SCHEMA')
             require(state['draft_sha'] == digest(state['draft']), 'STATE_IDENTITY')
             self.state = state
             self._invalidate(state, 'PROCESS_RESTART')
+            if self.connector:
+                for req in state['requests']:
+                    if req['status']=='ATTEMPT_STARTED_UNKNOWN':
+                        req.update(status='UNKNOWN_NO_RETRY',failure_code='PROCESS_RESTART_UNKNOWN')
             self._event(state, 'PROCESS_RESTART')
             self._persist(state)
         else:
-            self.state = {'schema': 'MUSE_LOCAL_CORE_R1', 'session': str(uuid.uuid4()),
+            self.state = {'schema': self.schema, 'session': str(uuid.uuid4()),
                 'source_loaded': False, 'source_epoch': 0, 'draft': '', 'revision': 0,
                 'draft_sha': digest(''), 'requests': [], 'reviews': [],
                 'offline_attempts': 0, 'live_attempts': 0, 'stopped': False, 'events': []}
+            if self.connector:self.state['connector_registry_id']=None
             self._persist(self.state)
 
     def close(self):
         self.lockfile.close()
+
+    def bind_connector(self,registry_id):
+        require(self.connector,'CONNECTOR_WORKSPACE_REQUIRED')
+        def op(s):
+            require(s['connector_registry_id'] in (None,registry_id),'CONSENT_REGISTRY_MISMATCH')
+            s['connector_registry_id']=registry_id
+        self._change(op)
 
     def _persist(self, state):
         raw = canonical(state)
@@ -131,7 +147,9 @@ class Store:
             require(s['source_loaded'], 'SOURCE_REQUIRED')
             require(bool(s['draft'].strip()), 'EMPTY_DRAFT')
             require(saved_sha == s['draft_sha'], 'SAVED_DRAFT_CHANGED')
-            require(s['offline_attempts' if mode == 'OFFLINE_DEMO' else 'live_attempts'] == 0, 'ATTEMPT_ALREADY_USED')
+            if not (self.connector and mode == 'META_LIVE'):
+                require(s['offline_attempts' if mode == 'OFFLINE_DEMO' else 'live_attempts'] == 0, 'ATTEMPT_ALREADY_USED')
+            require(not any(r['status']=='ATTEMPT_STARTED_UNKNOWN' for r in s['requests']), 'REQUEST_IN_FLIGHT')
             require(len(s['requests']) < 16, 'PREVIEW_LIMIT')
             for old in s['requests']:
                 if old['status'] == 'PREPARED':
@@ -170,19 +188,20 @@ class Store:
             self.check_current(req)
             require(req['status'] == 'PREPARED', 'REQUEST_REPLAY_OR_STALE')
             counter = 'offline_attempts' if mode == 'OFFLINE_DEMO' else 'live_attempts'
-            require(s[counter] == 0, 'ATTEMPT_ALREADY_USED')
+            if not (self.connector and mode == 'META_LIVE'):
+                require(s[counter] == 0, 'ATTEMPT_ALREADY_USED')
             s[counter] += 1; req['status'] = 'ATTEMPT_STARTED_UNKNOWN'
             self._event(s, mode+'_ATTEMPT_STARTED')
             return copy.deepcopy(req), s['draft']
         return self._change(op)
 
-    def finish(self, req, review, receipt, raw, commit_check=None):
+    def finish(self, req, review, receipt, raw, commit_check=None, current_allowed=True):
         def op(s):
             if commit_check is not None:
                 commit_check()
             stored = next(x for x in s['requests'] if x['id'] == req['id'])
             require(stored['status'] == 'ATTEMPT_STARTED_UNKNOWN', 'RESULT_REPLAY')
-            current = (not s['stopped'] and req['binding'] == self.binding(s) and
+            current = (current_allowed and not s['stopped'] and req['binding'] == self.binding(s) and
                        req['created_at'] <= time.time() <= req['expires_at'])
             result = {'request_id': req['id'], 'mode': req['mode'], 'binding': req['binding'],
                 'status': 'CURRENT' if current else 'STALE', 'stale_reason': None if current else 'CONTEXT_CHANGED_DURING_REVIEW',
@@ -208,6 +227,16 @@ class Store:
             self._event(s, reason)
         self._change(op)
 
+    def outcome(self, rid, transport, content, usage, raw=None, error=None, provenance=None):
+        def op(s):
+            req = next(x for x in s['requests'] if x['id'] == rid)
+            req['outcome'] = {'transport':transport, 'content_validation':content, 'provenance':provenance,
+                'usage':usage, 'billing':'UNRECONCILED', 'error':error,
+                'raw_response_sha':digest(raw) if raw is not None else None,
+                'raw_response_base64':base64.b64encode(raw).decode('ascii') if raw is not None else None}
+            self._event(s, 'CONNECTOR_OUTCOME_SAVED')
+        self._change(op)
+
     def view(self):
         with self.mutex:
             s = copy.deepcopy(self.state)
@@ -215,6 +244,8 @@ class Store:
             review.pop('raw_response_base64', None)
         for req in s['requests']:
             req.pop('body', None)
+            if 'outcome' in req:
+                req['outcome'].pop('raw_response_base64',None)
         s['source'] = {'id': SOURCE_ID, 'sha256': digest(SOURCE), 'text': SOURCE} if s['source_loaded'] else None
         s['formal_gate'] = 'OFF'
         s['real_meta_review_completed'] = any(r['receipt'].get('provenance') == 'REAL_META_RESPONSE' for r in s['reviews'])

@@ -1,9 +1,10 @@
-"""Loopback-only new MUSE core. No CLI flag can open formal Live authority."""
+"""Loopback editor; independent demo Live requires explicit per-request local consent."""
 import argparse
 import json
 import secrets
 import sys
 import threading
+from socketserver import TCPServer
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -14,7 +15,7 @@ from core.store import Store
 from core.meta_live import run_offline, run_live, safe_code
 
 
-def make_server(store, port=0, authority=None, credentials=None):
+def make_server(store, port=0, authority=None, credentials=None, demo_host=None):
     token = secrets.token_urlsafe(32)
     assets = {'/': ('web/index.html', 'text/html; charset=utf-8'),
               '/app.js': ('web/app.js', 'text/javascript; charset=utf-8'),
@@ -55,7 +56,9 @@ def make_server(store, port=0, authority=None, credentials=None):
                 self.origin()
                 if self.path == '/api/state':
                     data = store.view()
-                    data.update(csrf=token, example=EXAMPLE, live_host_connected=authority is not None and credentials is not None)
+                    data.update(csrf=token, example=EXAMPLE, live_host_connected=demo_host is not None,
+                        connector_mode=('CONTROLLED_TEST' if demo_host.test_mode else 'META_LIVE') if demo_host else 'OFFLINE_DEMO',
+                        multiple_live_requests=bool(demo_host))
                     self.reply(200, canonical(data))
                 elif self.path in assets:
                     file, mime = assets[self.path]
@@ -84,6 +87,8 @@ def make_server(store, port=0, authority=None, credentials=None):
                 elif self.path == '/api/prepare':
                     fields(body, ['mode', 'saved_sha'])
                     result = store.prepare(body['mode'], body['saved_sha'])
+                    if body['mode']=='META_LIVE' and demo_host is not None:
+                        result['confirmation']=demo_host.preview(result)
                 elif self.path == '/api/run':
                     fields(body, ['request_id', 'confirmed'])
                     req = store.request(body['request_id'])
@@ -91,39 +96,65 @@ def make_server(store, port=0, authority=None, credentials=None):
                         run_offline(store, req['id'], body['confirmed'])
                     else:
                         run_live(store, req['id'], body['confirmed'], authority, credentials)
+                elif self.path == '/api/live/execute':
+                    fields(body,['request_id','token','decisions','immediate'])
+                    require(demo_host is not None,'LIVE_AUTHORIZATION_PENDING')
+                    result=demo_host.execute(body['request_id'],body['token'],body['decisions'],body['immediate'])
+                elif self.path == '/api/live/cancel':
+                    fields(body,['request_id','token'])
+                    require(demo_host is not None,'LIVE_AUTHORIZATION_PENDING')
+                    demo_host.records.cancel(body['request_id'],body['token'])
                 elif self.path == '/api/stop':
                     fields(body, []); store.stop()
+                    if demo_host is not None:demo_host.stop()
                 else:
                     raise Refusal('ACTION_REJECTED')
                 visible = store.view()
-                visible['live_host_connected'] = authority is not None and credentials is not None
+                visible.update(live_host_connected=demo_host is not None,
+                    connector_mode=('CONTROLLED_TEST' if demo_host.test_mode else 'META_LIVE') if demo_host else 'OFFLINE_DEMO',
+                    multiple_live_requests=bool(demo_host))
                 self.reply(200, canonical({'state': visible, 'result': result}))
             except Exception as exc:
                 self.reply(409, canonical({'error': safe_code(exc)}))
 
-    server = ThreadingHTTPServer(('127.0.0.1', port), Handler)
+    class LocalServer(ThreadingHTTPServer):
+        def server_bind(self):
+            # No reverse-DNS lookup is necessary for a fixed loopback UI.
+            TCPServer.server_bind(self)
+            self.server_name='127.0.0.1';self.server_port=self.server_address[1]
+    server = LocalServer(('127.0.0.1', port), Handler)
     server.daemon_threads = True
     return server
 
 
-def main():
+def main(live=False):
     require(sys.flags.isolated and sys.dont_write_bytecode, 'USE_ISOLATED_PYTHON')
     from verify import verify
     verify(ROOT)
+    from core import network_guard
+    if live:network_guard.configure_live()
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=0)
-    parser.add_argument('--state', default='.muse-local')
+    parser.add_argument('--state', default='.muse-p2-workspace' if live else '.muse-local')
+    if live:
+        parser.add_argument('--consents',default='.muse-consents')
+        parser.add_argument('--account-reference',default='my-meta-account')
     args = parser.parse_args()
     require(0 <= args.port <= 65535, 'PORT_RANGE')
-    store = Store(args.state)
-    server = make_server(store, args.port)
-    print(json.dumps({'url': 'http://127.0.0.1:'+str(server.server_port), 'mode': 'OFFLINE_DEMO',
+    store = Store(args.state,connector=live)
+    host=None
+    if live:
+        from core.demo_host import DemoHost
+        host=DemoHost(store,args.consents,ROOT,args.account_reference)
+    server = make_server(store, args.port,demo_host=host)
+    print(json.dumps({'url': 'http://127.0.0.1:'+str(server.server_port), 'mode': 'META_LIVE_READY_FOR_LOCAL_CONFIRMATION' if live else 'OFFLINE_DEMO',
                       'formal_gate': 'OFF', 'live_authorization': 'PENDING'}), flush=True)
     try:
         server.serve_forever(poll_interval=0.2)
     except KeyboardInterrupt:
         pass
     finally:
+        if host is not None:host.shutdown()
         server.server_close()
         try:
             store.stop('NORMAL_STOP')

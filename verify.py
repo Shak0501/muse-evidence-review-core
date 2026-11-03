@@ -12,7 +12,7 @@ def verify(root):
     actual = set()
     for path in root.rglob('*'):
         rel = path.relative_to(root)
-        if rel.parts[0] in ('.git', '.muse-local'):
+        if rel.parts[0] in ('.git', '.muse-local', '.muse-p2-workspace', '.muse-consents'):
             continue
         assert not path.is_symlink(), 'SYMLINK_REJECTED'
         if path.is_file() and str(rel) != 'MANIFEST.json':

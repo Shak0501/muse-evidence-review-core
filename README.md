@@ -1,128 +1,151 @@
 # MUSE Evidence Review Core
 
-**Private release candidate · MIT license approved by Shak Lai; publication pending.**
+Ask Meta to review a saved draft against an exact source, inspect its quotations,
+then revise with an explicit version boundary. A review of an older revision
+becomes **STALE**. Model judgments, local quote checks and human approval remain
+separate.
 
-## What existed before the event
+Earlier private research and editor scaffolding informed this project. This
+standalone competition implementation was newly written on November 3, 2026;
+that earlier private implementation is not included or required. The P2 connector
+adds independent local consent, terminal credential input and once-only request
+records to the new core. No competition eligibility ruling is claimed.
 
-Earlier private editor scaffolding and governance research informed the product
-requirements. They are not included, imported or required by this new core. We
-do not claim that the earlier platform was created during the hackathon.
+## Run the main Meta workflow
 
-## What was built during the event
+Requirements: an existing Python 3.9+ installation on macOS or Linux, a local
+interactive terminal, a browser, and your own eligible Meta Model API account.
+Only Python's standard library is used. Nothing needs to be installed with pip.
+Windows terminal and filesystem behavior are not qualified.
 
-This specification-based R1 was newly implemented on **2026-11-03**: one synthetic
-source, human-saved UTF-8 draft revisions, a bounded review request, exact local
-quotation checks, four distinct verdict displays and stale-result invalidation.
-The Python server, storage, Meta HTTPS adapter and browser interface were written
-for this standalone core; the earlier private implementation is not bundled.
-The four-sentence test was provided in the task; the short Larch notice and offline
-response fixture were newly authored for this implementation. No historical Git
-timestamps or commits are fabricated. On 2026-11-03 (Asia/Taipei), Shak Lai
-confirmed the right to license this standalone competition core under MIT.
-See [LICENSE](LICENSE) and [RIGHTS_STATUS.md](RIGHTS_STATUS.md). Unincluded private
-works and local user data are outside this distribution.
-
-## How to run the new project
-
-Requirements: an existing **Python 3.9+ on macOS or Linux**, a modern browser, and
-a writable local directory. Only the Python standard library is used. No pip,
-Node, CDN, downloaded model, private source code or API key is needed.
-
-In Terminal, from this directory:
+From the directory containing this README:
 
 ```sh
 python3 -I -B -S verify.py
+python3 -I -B -S live.py
+```
+
+Open the printed `http://127.0.0.1:...` address in the same computer's browser.
+Startup does not obtain a credential, resolve Meta's hostname, or send a request.
+Do not expose this local service to other machines or use an untrusted shared
+computer. Keep the terminal open.
+
+1. Load the Larch synthetic source. Insert the four-sentence example or write your
+   own non-secret draft, then **Save draft**.
+2. Select **Meta Live** and **Preview this review request**. Review the complete
+   source, saved draft, exact serialized request, model, destination, program
+   Manifest, account reference, revision and request SHA. Bytes are not tokens.
+3. Make each decision separately: B1 demo-use acceptance, risk acceptance,
+   DATA_EGRESS, BUDGET_ONCE and FINAL_DISPATCH. All boxes start unchecked.
+   The final **Confirm and request one Meta review** button separately records
+   IMMEDIATE_HUMAN_CONFIRMATION. Closing the preview sends nothing.
+4. Only after that final action, enter your own Meta API credential in the server
+   terminal's hidden prompt. It is never a browser field, environment variable,
+   command argument or credential file. Ctrl-C or Escape cancels; Ctrl-D ends
+   input; a 60-second timeout also ends it. There is no echo fallback. Ordinary
+   input cancellation restores the terminal. Abrupt OS termination may require
+   restoring the terminal yourself. No absolute memory-erasure claim is made.
+5. Read the actual response, quote validation and reported usage. Real Meta may
+   produce any valid distribution of the four categories, not necessarily one of
+   each. Schema or citation failures remain failures; no mock answer replaces
+   them. No result automatically approves, signs, publishes or rewrites a draft.
+6. Edit and save. The previous review becomes STALE, including when the old text
+   is later restored. Each new request needs a new preview and explicit consent.
+
+The connector is implemented and **only offline-verified**. This distribution's
+engineering tests do not grant the author's real-use exception, budget, account
+access or first real dispatch. A judge acts as a trusted local operator using
+their own account, credential, independent decisions and costs. Possession of
+this code does not grant the author's credits or permissions.
+
+`muse-wonder-1.0` at `https://api.meta.ai/v1/responses` is the only destination.
+The frozen request uses low reasoning, 2048 maximum output tokens, no tools,
+background execution, streaming, count call, remote continuation, retries or
+provider fallback. The US$0.10 risk allowance presented for acceptance is **not a
+provider-enforced billing ceiling**. Account eligibility, current pricing and
+actual fees remain the operator's responsibility. Usage and billing are not the
+same thing; unknown usage is `null`, not zero.
+
+## Offline backup (no account or key)
+
+```sh
 python3 -I -B -S app.py
 ```
 
-Open the exact `http://127.0.0.1:PORT` URL printed by the server. It listens only
-on loopback. The port is chosen locally; there is no fixed private absolute path.
-Local data goes into `.muse-local/` with owner-only permissions; it is excluded
-from the release manifest and Git. Never commit this folder. Use a private local
-filesystem. This storage is not encrypted and does not establish payment or
-execution permission. Close the server with **Control-C**, and confirm `stopped: true`.
+Open the printed address; load Larch, insert the example, save, preview and run
+one **Offline demo** review. Its response is a fixed synthetic fixture, explicitly
+labelled as such. It demonstrates UI, identities and quote checks, not Meta's
+semantic capability. One offline attempt per practice workspace remains the
+baseline rule. No Live capability is unlocked by that practice consent.
 
-In the browser:
+## Stop, records and uncertainty
 
-1. **Load Larch source**.
-2. **Use the four-sentence example**, or write it manually; press **Save draft**.
-3. Keep **Offline demo** selected. **Preview this review request**, then explicitly
-   **Run this offline review once**.
-4. Read the four simulated findings. Expand **View exact source quotation** beside
-   the home-visits contradiction. The missing bulbs claim is not a contradiction.
-5. Edit and save the draft. The earlier result becomes **STALE**, even if later
-   edits restore identical text. Old revision evidence never approves a new one.
-6. **Emergency Stop** blocks subsequent work immediately. It does not delete the
-   draft or claim that remote work/costs are cancelled. Then Control-C the server.
+**Emergency Stop** stops new local work and cancels waiting credential input.
+It cannot withdraw an already-sent remote request or guarantee a refund. An
+already-sent bounded reply may be retained as STALE historical evidence.
+Close the server with **Control-C** in its terminal; wait for `stopped: true`.
+Closing the browser alone does not stop the server.
 
-One offline review attempt is allowed in this local workspace. Reopening the same
-workspace does not replenish attempts or make old reviews current. There is no
-Reset-to-retry button. An offline result never grants permission to make a paid call.
+Live writing is in `.muse-p2-workspace`; separate private once-only records are in
+`.muse-consents`. Offline writing is in `.muse-local`. These directories are
+excluded from Git and from the public Manifest. They contain local session
+identities, requests and safe replies, never deliberately retained credentials.
+Keep them private; do not publish them or include them in a video.
 
-Optional targeted verification (only this new core):
+A durable consumed marker is written **before** credential acquisition or
+transmission. Cancellation after final confirmation consumes that request even
+when transport never begins. A new independent request may be prepared and
+confirmed; this never replays the old one. A stopped workspace can be viewed but
+cannot resume dispatch. To deliberately start fresh writing after stopping:
 
 ```sh
-python3 -I -B -S test.py
+python3 -I -B -S live.py --state /path/to/a/new-private-workspace --consents /path/to/the/same-private-consents
 ```
 
-## How to use real Meta inference
+Use your actual private paths outside the code directory. The parent directories
+must exist. Preserve the consent directory: copying an ordinary workspace into a
+new consent registry is rejected, and consumed request IDs cannot be reused.
+Restart invalidates pending requests and current results; interrupted attempts
+remain UNKNOWN and are not resent. Missing, corrupt, unsafe or unwritable records
+fail closed. There is no Reset that restores a spent permit. At most 16 previews
+per workspace and 256 consent records per registry bound local storage; reaching
+those limits is a refusal, not permission to erase history or retry.
 
-The adapter implements a single TLS-verified POST to
-`https://api.meta.ai/v1/responses` using `muse-wonder-1.0`. It parses actual
-Responses output/usage and verifies source quotes locally. It does not force
-real results to match the four synthetic labels.
+This is a local demo-use record, not an organizational authority, account balance
+or financial ledger. It assumes a trusted machine owner. It does not defend
+against an administrator rolling back the entire disk or editing program/state
+files. Existing budgets and historical obligations are not imported or changed.
+See [the connector contract](LIVE_HOST_CONTRACT.md).
 
-**The distributed launcher deliberately has no Live authority or credential
-connection. Selecting Meta Live produces an exact request preview, not permission
-to send. No CLI switch, browser field or uploaded grant can enable it.**
+## Verify the new connector offline
 
-A server-side host connection is still required through
-`make_server(store, authority=..., credentials=...)`; the exact interface and
-remaining requirements are in [LIVE_HOST_CONTRACT.md](LIVE_HOST_CONTRACT.md).
-No independently runnable Live host is included yet. Test doubles must never be
-used to authorize real requests. A future demo-only host needs its own versioned
-scope and acceptance; documentation alone does not enable that path.
+```sh
+python3 -I -B -S connector_test.py
+```
 
-The optional hidden-terminal credential class is an **unapproved proposal**, not
-an enabled or qualified secret service. No real credential has been used with it.
-Do not put keys in a browser, command argument, recording, repository or log.
-Clearing a Python buffer is not a guarantee that every memory copy is erased.
+This verifies the A–D scope using synthetic secrets through actual PTYs, controlled
+responses, local HTTP, process races and cold startup. Its process network fence
+refuses non-loopback access and cannot switch to Live mode. Synthetic outputs and
+decisions remain labelled. The existing targeted baseline tests are separately
+available with `python3 -I -B -S test.py`; they are not a fresh count of new methods.
+Neither command performs a real Meta inference or uses real credentials.
 
-Real use requires the operator's own eligible Meta account, a reviewed server-side
-credential connection, explicit approval of the exact outgoing data, a one-use
-risk allowance and immediate confirmation before sending. The operator is
-responsible for actual provider charges. This repository grants no account access,
-credits or execution permission. **LIVE_AUTHORIZATION_PENDING**: no real Meta
-review has been completed for this core.
+## Limits and disclosure
 
-## What remains simulated
+Only the fixed fictional Larch source is supported. Drafts are limited to 8192
+UTF-8 bytes and eight explicitly segmented sentences. No CSV, PDF, other AI model,
+organizational roles, legal certification, automated publishing or signature flow
+is included. Local quotation validity proves where words occur; it does not prove
+semantic truth, completeness or professional correctness. Unsupported or invalid
+responses require human review.
 
-Offline findings are deterministic fixture output. Unknown wording returns
-NEEDS_HUMAN_REVIEW. Fake transport/authority/credential objects exist only in the
-tests. They never establish formal authorization or real usage. No second AI
-provider is included. Manual writing and local quotation checking are not AI calls.
+A separate historical short Meta connectivity test was human-reported. It is not
+this integrated review and does not qualify this connector as real-Live tested.
+The integrated offline test's four categories are not real Meta judgments.
 
-## Known limitations
-
-- Only the fixed Larch synthetic source; no arbitrary source imports, CSV, PDF,
-  professional-domain checks, signatures or team roles. English UI only.
-- Sentence spans are mechanical punctuation segments, not general semantic claim
-  extraction. At most eight segments; draft maximum 8,192 UTF-8 bytes. No Unicode
-  normalization or newline conversion occurs when saving the submitted string.
-- Exact quotes prove location/identity, not entailment or truth. Actual model
-  classifications still require human review. Local arithmetic is not implemented.
-- No automatic rewrite, adoption, approval, retry or fallback. An attempt consumed
-  before an execution failure stays consumed/UNKNOWN; no automatic retry is allowed.
-- The proposed US$0.10 risk allowance is not a provider charge ceiling. Actual
-  usage is preserved; billing stays UNRECONCILED until independently checked.
-- A real network call has bounded socket waits (15s) and a checked 45s deadline;
-  a blocked read may return after the deadline by up to its socket timeout.
-  Local Stop cannot retract a request already received by Meta.
-- Successful raw responses are retained only in private local state. Rejected
-  responses are not stored if they may expose secrets; sanitized failure codes
-  and consumed-attempt state remain. There is no disk secure-erasure guarantee.
-- Current code identity is verifiable; organizer eligibility,
-  the real Live recording, repository publication and submission remain pending.
-  Discord application guidance is not a final organizer ruling.
-
-**Current default: OFFLINE DEMO. Live dispatch is disabled; no automatic retry.**
+MIT, Copyright (c) 2026 Shak Lai. See [LICENSE](LICENSE) and
+[RIGHTS_STATUS.md](RIGHTS_STATUS.md). No prior private code, private session,
+credential, third-party source, artwork, model weight or hidden service is
+required. New work and source rights are disclosed without granting rights to
+unpublished private works. Publication and competition submission are separate
+human decisions.

@@ -23,3 +23,9 @@ No third-party source, font or model is bundled. Python remains a separately
 installed runtime; any future bundled dependency requires its own license review.
 License selection does not establish organizer eligibility or permission to use
 any Meta account or credits. Do not publish local workspace data.
+
+P2 adds the public standalone demo connector, terminal channel, network fence,
+local-consent UI and targeted tests on 2026-11-03. They were written for the same
+independent competition core, within the owner-approved MIT scope. No code or
+records from private execution services were copied. These additions are working
+candidate changes; this statement is not a new Commit, publication or Live grant.

@@ -108,20 +108,25 @@ def parse_response(status, raw, req, draft):
 class MetaHTTPS:
     """One POST, TLS verification, no redirects/proxy/env/key lookup/retry/fallback."""
     def send(self, body, secret, still_current):
+        self.trace = {'phase':'NOT_STARTED','http_status':None}
         require(type(body) is bytes and len(body) <= 65536, 'REQUEST_SIZE')
         require(type(secret) is bytearray and 16 <= len(secret) <= 4096, 'CREDENTIAL_TYPE')
         require(all(33 <= b <= 126 for b in secret), 'CREDENTIAL_FORMAT')
         require(not secret.startswith(b'SYNTHETIC_'), 'SYNTHETIC_SECRET_ON_REAL_TRANSPORT')
         still_current()
         conn = http.client.HTTPSConnection('api.meta.ai', 443, timeout=15, context=ssl.create_default_context())
+        if getattr(self, 'fixed_destination_guard', False):
+            from .network_guard import fixed_connection
+            conn._create_connection = fixed_connection
         deadline = time.monotonic()+45
         try:
             # Headers remain transient; never included in receipts, stdout or exceptions.
+            self.trace['phase']='ATTEMPTED_UNKNOWN'
             conn.request('POST', '/v1/responses', body=body, headers={
                 'Content-Type': 'application/json', 'Authorization': 'Bearer '+secret.decode('ascii'),
                 'Accept': 'application/json', 'User-Agent': 'MUSE-Evidence-Core-R1'})
             response = conn.getresponse()
-            require(response.status == 200, 'HTTP_STATUS_REJECTED')
+            self.trace.update(phase='HTTP_RESPONSE_RECEIVED', http_status=response.status)
             require(response.getheader('Content-Type', '').split(';')[0].strip().lower() == 'application/json', 'HTTP_CONTENT_TYPE')
             length = response.getheader('Content-Length')
             require(length is None or length.isdigit() and int(length) <= MAX_REPLY, 'RESPONSE_SIZE')
@@ -137,6 +142,7 @@ class MetaHTTPS:
                 require(total <= MAX_REPLY, 'RESPONSE_SIZE')
                 chunks.append(block)
             still_current()
+            self.trace['phase']='RESPONSE_BODY_RECEIVED'
             return response.status, b''.join(chunks)
         finally:
             conn.close()
