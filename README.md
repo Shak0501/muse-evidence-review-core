@@ -11,6 +11,10 @@ that earlier private implementation is not included or required. The P2 connecto
 adds independent local consent, terminal credential input and once-only request
 records to the new core. No competition eligibility ruling is claimed.
 
+## Recorded live demo
+
+[Watch the hackathon demo — real Meta inference and STALE](https://youtu.be/LRThYu3e7CU)
+
 ## Run the main Meta workflow
 
 Requirements: an existing Python 3.9+ installation on macOS or Linux, a local
@@ -52,11 +56,14 @@ computer. Keep the terminal open.
 6. Edit and save. The previous review becomes STALE, including when the old text
    is later restored. Each new request needs a new preview and explicit consent.
 
-The connector is implemented and **only offline-verified**. This distribution's
-engineering tests do not grant the author's real-use exception, budget, account
-access or first real dispatch. A judge acts as a trusted local operator using
-their own account, credential, independent decisions and costs. Possession of
-this code does not grant the author's credits or permissions.
+Targeted engineering tests remain offline checks. Separately, on November 3,
+2026, the author completed a human-confirmed integrated Meta Live demonstration
+using `muse-wonder-1.0`. The application received HTTP 200, validated the
+response schema and exact source quotations locally, and showed the prior
+review becoming **STALE** after a saved human revision. This bounded demo does
+not establish general semantic accuracy, billing reconciliation or production
+approval. Judges use their own eligible Meta account, credentials, independent
+decisions and costs. This code grants no access to the author's credits.
 
 `muse-wonder-1.0` at `https://api.meta.ai/v1/responses` is the only destination.
 The frozen request uses low reasoning, 2048 maximum output tokens, no tools,
@@ -144,9 +151,12 @@ is included. Local quotation validity proves where words occur; it does not prov
 semantic truth, completeness or professional correctness. Unsupported or invalid
 responses require human review.
 
-A separate historical short Meta connectivity test was human-reported. It is not
-this integrated review and does not qualify this connector as real-Live tested.
-The integrated offline test's four categories are not real Meta judgments.
+An earlier short Meta connectivity test is separate from this integrated demo.
+The first integrated live response was rejected by the original local parser;
+the unchanged captured response later passed offline revalidation after a
+compatibility fix, without another Meta API call. The subsequently recorded
+integrated demo shows real Meta inference. Offline Demo findings remain
+synthetic, not real Meta judgments.
 
 MIT, Copyright (c) 2026 Shak Lai. See [LICENSE](LICENSE) and
 [RIGHTS_STATUS.md](RIGHTS_STATUS.md). No prior private code, private session,
